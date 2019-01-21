@@ -19,6 +19,11 @@ constructor(private val productService: ProductService) : ProductFacade {
         val log = Logger.getLogger(DefaultProductFacade::class.simpleName)!!
     }
 
+    /**
+     * Populate and return list of discounted products formatted as per given label type
+     * @param products: List<Product>
+     * @param labelType: String
+     */
     override fun populateDiscountedProductsData(products: List<Product>, labelType: String): Products {
 
         log.info("Populating discounted products list... ")
