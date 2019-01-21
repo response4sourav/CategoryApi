@@ -20,6 +20,10 @@ class DefaultProductService : ProductService {
     @Value("\${textlabel.percent.discount}")
     private val percDiscountLabel: String= ""
 
+    /**
+     * Returns equivalent RGB Hex Color code for a given color
+     * @param basicColor: String
+     */
     override fun getHexColor(basicColor: String): String {
 
         return if (basicColor.isNotEmpty() && Enums.getIfPresent(ColorRGB::class.java, basicColor.toUpperCase()).isPresent) {
@@ -27,10 +31,19 @@ class DefaultProductService : ProductService {
         } else StringUtils.EMPTY
     }
 
+    /**
+     * Returns discounted amount for given Price object
+     * @param price: Price
+     */
     override fun getPriceReduction(price: Price): Double {
         return getReductionAmount(getAmount(price.was), getAmount(price.now))
     }
 
+    /**
+     * Returns formatted price amount for given Price object and currency
+     * @param price: Any
+     * @param currency: String
+     */
     override fun formattedPrice(price: Any, currency: String): String {
         val priceVal = getFloatValue(getAmount(price))
         val currencySymbol = getCurrencySymbol(currency)
@@ -41,6 +54,11 @@ class DefaultProductService : ProductService {
         }
     }
 
+    /**
+     * Returns formatted price label for given Price object and label type
+     * @param price: Price
+     * @param labelType: String
+     */
     override fun formatPriceLabel(price: Price, labelType: String): String {
 
         var label = LabelType.SHOWWASNOW
