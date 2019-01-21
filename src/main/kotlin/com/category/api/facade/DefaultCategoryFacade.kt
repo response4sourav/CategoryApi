@@ -10,6 +10,11 @@ import org.springframework.util.CollectionUtils
 class DefaultCategoryFacade @Autowired
 constructor(private val categoryService: CategoryService, private val productFacade: ProductFacade) : CategoryFacade {
 
+    /**
+     * Returns list of discounted products under the given category formatted as per given label type
+     * @param categoryId: String
+     * @param labelType: String
+     */
     override fun getDiscountedProductForCategory(categoryId: String, labelType: String): Products {
 
         val products = categoryService.getProductsForCategory(categoryId)
