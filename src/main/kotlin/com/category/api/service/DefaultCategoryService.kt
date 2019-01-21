@@ -45,6 +45,10 @@ constructor(restTemplateBuilder: RestTemplateBuilder) : CategoryService {
                 .build()
     }
 
+    /**
+     * Returns list of serialized products under the given category
+     * @param categoryId: String
+     */
     override fun getProductsForCategory(categoryId: String): Products {
 
         val url = StringBuilder(baseUrl)
