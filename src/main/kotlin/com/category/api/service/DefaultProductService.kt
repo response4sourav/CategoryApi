@@ -117,7 +117,7 @@ class DefaultProductService : ProductService {
         return if (price is String) price
         else {
             val mapper = ObjectMapper()
-            mapper.convertValue(price, PriceValue::class.java).from!!
+            mapper.convertValue(price, PriceValue::class.java).from
         }
     }
 

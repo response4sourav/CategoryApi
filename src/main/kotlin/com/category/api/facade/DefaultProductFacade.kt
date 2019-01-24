@@ -67,7 +67,7 @@ constructor(private val productService: ProductService) : ProductFacade {
         colorSwatches.forEach { colorSwatch ->
             val fmtColorSwatch = ColorSwatch()
             fmtColorSwatch.color = colorSwatch.color
-            fmtColorSwatch.rgbColor = productService.getHexColor(colorSwatch.basicColor!!)
+            fmtColorSwatch.rgbColor = productService.getHexColor(colorSwatch.basicColor)
             fmtColorSwatch.skuId = colorSwatch.skuId
             fmtColorSwatches.add(fmtColorSwatch)
         }

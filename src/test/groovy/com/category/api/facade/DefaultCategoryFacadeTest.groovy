@@ -13,7 +13,7 @@ class DefaultCategoryFacadeTest extends Specification {
     def categoryId = "12345"
     def labelType = "XYZ"
 
-    def "should get discounted products under a category if available"() {
+    def "should get products under a category if available"() {
 
         given:
         def allProducts = new Products()
@@ -23,14 +23,14 @@ class DefaultCategoryFacadeTest extends Specification {
 
         and:
         categoryService.getProductsForCategory(categoryId) >> allProducts
-        def discountedProducts = productFacade.populateDiscountedProductsData(allProducts, labelType)
+        def discountedProducts = productFacade.populateDiscountedProductsData(allProducts.products, labelType)
 
         expect:
         discountedProducts == categoryFacade.getDiscountedProductForCategory(categoryId, labelType)
 
     }
 
-    def "shouldn't get discounted products under a category if error"() {
+    def "shouldn't get products under a category if connection error"() {
 
         given:
         def allProducts = new Products()
@@ -44,7 +44,7 @@ class DefaultCategoryFacadeTest extends Specification {
 
     }
 
-    def "shouldn't get discounted products under a category if no product available"() {
+    def "shouldn't get products under a category if no product available"() {
 
         given:
         def allProducts = new Products()
