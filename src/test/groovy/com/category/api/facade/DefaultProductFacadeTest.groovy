@@ -11,8 +11,8 @@ class DefaultProductFacadeTest extends Specification {
 
     def productService = GroovyMock ProductService
     def productFacade = new DefaultProductFacade(productService)
-    def normalProductPrice = new Price(was: 10f, now: 10f)
-    def discountedProductPrice = new Price(was: 10f, now: 5f)
+    def normalProductPrice = new Price(was: 10f, now: 10f, currency: "GBP")
+    def discountedProductPrice = new Price(was: 10f, now: 5f, currency: "GBP")
     def labelType = "XYZ"
     def basicColor = "Blue"
 
@@ -21,14 +21,13 @@ class DefaultProductFacadeTest extends Specification {
         given:
         def normalProduct = new Product(price: normalProductPrice, colorSwatches: Collections.EMPTY_LIST)
         def discountedProduct = new Product(price: discountedProductPrice, colorSwatches: Collections.EMPTY_LIST)
-        def productList = [normalProduct, discountedProduct]
 
         and:
         productService.getPriceReduction(normalProductPrice) >> 0
         productService.getPriceReduction(discountedProductPrice) >> 1
 
         expect:
-        productFacade.populateDiscountedProductsData(productList, labelType).products.size() == 1
+        productFacade.populateDiscountedProductsData([normalProduct, discountedProduct], labelType).products.size() == 1
 
     }
 
@@ -36,13 +35,12 @@ class DefaultProductFacadeTest extends Specification {
 
         given:
         def normalProduct = new Product(price: normalProductPrice, colorSwatches: Collections.EMPTY_LIST)
-        def productList = [normalProduct]
 
         and:
         productService.getPriceReduction(normalProductPrice) >> 0
 
         expect:
-        !productFacade.populateDiscountedProductsData(productList, labelType).errorMessage.isEmpty()
+        !productFacade.populateDiscountedProductsData([normalProduct], labelType).errorMessage.isEmpty()
 
     }
 
@@ -78,4 +76,21 @@ class DefaultProductFacadeTest extends Specification {
         productFacade.populateDiscountedProductsData(productList, labelType).products[0].colorSwatches.size() == 0
 
     }
+
+    def "should get formatted price inside discounted products data if price available"()  {
+
+        given:
+        def discountedProduct = new Product(price: discountedProductPrice, colorSwatches: Collections.EMPTY_LIST)
+        def productList = [discountedProduct]
+
+        and:
+        productService.getPriceReduction(discountedProductPrice) >> 1
+        productService.formattedPrice(discountedProductPrice.now, discountedProductPrice.currency) >> "£5.00"
+
+        expect:
+        productFacade.populateDiscountedProductsData(productList, labelType).products.size() == 1
+        productFacade.populateDiscountedProductsData(productList, labelType).products[0].nowPrice == "£5.00"
+
+    }
+
 }

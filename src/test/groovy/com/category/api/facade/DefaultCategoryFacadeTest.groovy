@@ -16,10 +16,8 @@ class DefaultCategoryFacadeTest extends Specification {
     def "should get products under a category if available"() {
 
         given:
-        def allProducts = new Products()
         def discountedProduct = new Product()
-        allProducts.setProducts(Collections.singletonList(discountedProduct))
-        allProducts.errorMessage = ""
+        def allProducts = new Products(products: Collections.singletonList(discountedProduct), errorMessage: "")
 
         and:
         categoryService.getProductsForCategory(categoryId) >> allProducts
@@ -33,8 +31,7 @@ class DefaultCategoryFacadeTest extends Specification {
     def "shouldn't get products under a category if connection error"() {
 
         given:
-        def allProducts = new Products()
-        allProducts.errorMessage = "error"
+        def allProducts = new Products(errorMessage: "error")
 
         and:
         categoryService.getProductsForCategory(categoryId) >> allProducts
@@ -47,9 +44,7 @@ class DefaultCategoryFacadeTest extends Specification {
     def "shouldn't get products under a category if no product available"() {
 
         given:
-        def allProducts = new Products()
-        allProducts.setProducts(Collections.EMPTY_LIST)
-        allProducts.errorMessage = ""
+        def allProducts = new Products(products: Collections.EMPTY_LIST, errorMessage: "")
 
         and:
         categoryService.getProductsForCategory(categoryId) >> allProducts
