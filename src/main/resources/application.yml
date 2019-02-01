@@ -1,0 +1,31 @@
+spring:
+  application.name: category-api-app
+  jackson.default-property-inclusion: non_null
+
+server.port: 8080
+
+clients:
+  category:
+    readTimeout: 15000
+    connectTimeout: 5000
+    url: https://jl-nonprod-syst.apigee.net
+    path: /v1/categories/{categoryId}/products?key=2ALHCAAs6ikGRBoy6eTHA58RaG097Fma
+    apikey: 2ALHCAAs6ikGRBoy6eTHA58RaG097Fma
+
+feign.hystrix.enabled: true
+
+hystrix.threadpool.default.coreSize: 16
+
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+          isolation.thread.timeoutInMilliseconds: 40000
+    CategoryApiClient#getProductsInCategory(String):
+      circuitBreaker:
+        requestVolumeThreshold: 6
+        errorThresholdPercentage: 40
+
+management.endpoints.web.exposure.include: hystrix.stream

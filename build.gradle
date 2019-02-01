@@ -33,12 +33,18 @@ ext {
 }
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix-dashboard'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
+
+    compile("com.squareup.okhttp3:okhttp:3.9.1")
+    compile("com.squareup.okhttp3:logging-interceptor:3.9.1")
+    compile("io.github.openfeign:feign-okhttp")
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.spockframework:spock-core:1.0-groovy-2.4'
 }

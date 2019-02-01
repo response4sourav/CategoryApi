@@ -4,5 +4,5 @@ import com.category.api.model.Products
 
 interface CategoryService {
 
-    fun getProductsForCategory(categoryId: String): Products
+    fun getDiscountedProductForCategory(categoryId: String, labelType: String): Products
 }

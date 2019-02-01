@@ -1,15 +1,21 @@
 package com.category.api
 
+import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
+import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker
+import org.springframework.cloud.netflix.hystrix.dashboard.EnableHystrixDashboard
+import org.springframework.cloud.openfeign.EnableFeignClients
 import org.springframework.context.annotation.PropertySource
 
 @SpringBootApplication
-@PropertySource(value = ["classpath:/application.properties"])
+@EnableFeignClients
+@EnableCircuitBreaker
+@EnableHystrixDashboard
+@PropertySource(value = ["classpath:/messages.properties"])
 class ApiApplication
 
 fun main(args: Array<String>) {
-    runApplication<ApiApplication>(*args)
+    SpringApplication.run(ApiApplication::class.java, *args)
 }
 
 

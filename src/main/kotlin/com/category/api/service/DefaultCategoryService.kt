@@ -1,78 +1,88 @@
 package com.category.api.service
 
-import com.category.api.RestTemplateErrorHandler
+import com.category.api.client.CategoryApiClient
+import com.category.api.model.ColorSwatch
+import com.category.api.model.Product
 import com.category.api.model.Products
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.http.*
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestClientException
-import org.springframework.web.client.RestTemplate
-import java.time.Duration
-import java.util.logging.Logger
+import java.util.ArrayList
+import kotlin.streams.toList
 
 @Service
 class DefaultCategoryService @Autowired
-constructor(restTemplateBuilder: RestTemplateBuilder) : CategoryService {
+constructor(private val categoryApiClient: CategoryApiClient,
+            private val productService: ProductService) : CategoryService {
 
-    private val restTemplate: RestTemplate
-
-    @Value("\${category.base.url}")
-    private val baseUrl: String = ""
-
-    @Value("\${category.product.endpoint}")
-    private val productPath: String = ""
-
-    @Value("\${category.api.key}")
-    private val apiKey: String = ""
-
-    @Value("\${category.api.connection.timeout}")
-    private val connectionTimeout: Duration = Duration.ofSeconds(5)
-
-    @Value("\${category.api.read.timeout}")
-    private val readTimeout: Duration = Duration.ofSeconds(15)
 
     companion object {
-        val log = Logger.getLogger(DefaultCategoryService::class.simpleName)!!
+        val LOG: Logger = LoggerFactory.getLogger(CategoryService::class.java)
     }
 
-    init {
-        this.restTemplate = restTemplateBuilder
-                .setConnectTimeout(connectionTimeout)
-                .setReadTimeout(readTimeout)
-                .errorHandler(RestTemplateErrorHandler())
-                .build()
+    override fun getDiscountedProductForCategory(categoryId: String, labelType: String): Products {
+
+        val products = getProductsInCategory(categoryId)
+        return populateDiscountedProductsData(products.products!!, labelType)
     }
 
-    /**
-     * Returns list of serialized products under the given category
-     * @param categoryId: String
-     */
-    override fun getProductsForCategory(categoryId: String): Products {
 
-        val url = StringBuilder(baseUrl)
-        url.append(categoryId).append(productPath).append(apiKey)
-        log.info("Trying to fetch products from category api endpoint : " + url.toString())
+    private fun getProductsInCategory(categoryId: String): Products {
 
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        val entity = HttpEntity<String>(headers)
-        var products = Products()
+        return categoryApiClient.getProductsInCategory(categoryId).execute()
+    }
 
-        try {
-            val response = restTemplate.exchange(url.toString(), HttpMethod.GET, entity, Products::class.java)
-            if (HttpStatus.OK == response.statusCode) {
-                products = response.body!!
-                log.info("Successfully fetched products from category api endpoint!")
-            }
+    private fun populateDiscountedProductsData(products: List<Product>, labelType: String): Products {
 
-        } catch (ex: RestClientException) {
-            log.severe("Error occurred while calling category api endpoint $ex")
-            products.errorMessage = "Error occurred while calling api endpoint " + ex.message
+        LOG.info("Populating discounted products list... ")
+
+        //filter products having price reduction
+        val discountedProducts: List<Product> = products.stream()
+                .filter { p -> productService.getPriceReduction(p.price!!) > 0 }.toList()
+
+        return if (discountedProducts.isNotEmpty()) {
+            //sort by reduction price
+            val sortedDscProds = discountedProducts.sortedWith(compareByDescending { p -> productService.getPriceReduction(p.price!!) })
+
+            //format and populate discounted products data
+            LOG.info("Returned the list of " + sortedDscProds.size + " formatted discounted products! ")
+            getDiscountedProductsData(sortedDscProds, labelType)
+
+        } else {
+            LOG.info("No Discounted product available under this category! ")
+            Products(errorMessage = "No Discounted product available under this category! ")
         }
+    }
 
-        return products
+    private fun getDiscountedProductsData(discountedProducts: List<Product>, labelType: String): Products {
+        val discountedProductsData = ArrayList<Product>()
+        discountedProducts.forEach { p ->
+            discountedProductsData.add(
+                    Product(
+                            title = p.title,
+                            productId = p.productId,
+                            nowPrice = productService.formattedPrice(p.price?.now!!, p.price?.currency!!),
+                            priceLabel = productService.formatPriceLabel(p.price!!, labelType),
+                            colorSwatches = populateColorSwatches(p.colorSwatches!!)
+                    )
+            )
+        }
+        return Products(products = discountedProductsData)
+    }
+
+    private fun populateColorSwatches(colorSwatches: List<ColorSwatch>): List<ColorSwatch> {
+        val fmtColorSwatches = ArrayList<ColorSwatch>()
+        colorSwatches.forEach { cs ->
+            fmtColorSwatches.add(
+                    ColorSwatch(
+                            color = cs.color,
+                            skuId = cs.skuId,
+                            rgbColor = productService.getHexColor(cs.basicColor)
+                    )
+            )
+        }
+        return fmtColorSwatches
     }
 
 }
