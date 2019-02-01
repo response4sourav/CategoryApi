@@ -29,7 +29,7 @@ open class ErrorLoggingFallbackFactory<T>(val clientName: String, val fallbackCl
 }
 
 fun <T> wrapObjectInHystrixFallback(returnedObject: T): HystrixCommand<T> {
-    return object : HystrixCommand<T>(HystrixCommandGroupKey.Factory.asKey("Fraud Data Aggregator")) {
+    return object : HystrixCommand<T>(HystrixCommandGroupKey.Factory.asKey("Category API Service")) {
         override fun run() = returnedObject
     }
 }
